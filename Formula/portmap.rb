@@ -3,8 +3,8 @@ class Portmap < Formula
 
   desc "Branch-scoped port allocator and Traefik label generator for docker-compose"
   homepage "https://github.com/ylang-ylang/portmap"
-  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.8.tar.gz"
-  sha256 "472b54bfddc0a135e4effbecae4c02db0ab2d835633a034d75af30dde5364cde"
+  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.9.tar.gz"
+  sha256 "ba270c01b92a9836c71c681ac4e16acb2654e432323d82b9c4ea0088228b9a51"
   license "MIT"
 
   depends_on "python@3.12"
