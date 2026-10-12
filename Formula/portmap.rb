@@ -1,13 +1,16 @@
 class Portmap < Formula
   include Language::Python::Virtualenv
 
-  desc "Branch-scoped port allocator and Traefik label generator for docker-compose"
+  desc "Unified local development gateway and split-DNS remote access"
   homepage "https://github.com/ylang-ylang/portmap"
-  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.9.tar.gz"
-  sha256 "ba270c01b92a9836c71c681ac4e16acb2654e432323d82b9c4ea0088228b9a51"
+  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.10.tar.gz"
+  version "0.10.0"
+  sha256 "76f48ee53ca93fd4169f9da16fadeb190cf5aa1c37b5a8cf0e8d41140b48dbcb"
   license "MIT"
 
   depends_on "python@3.12"
+  depends_on "coredns"
+  depends_on "traefik"
 
   def install
     virtualenv_install_with_resources
