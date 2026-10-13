@@ -3,23 +3,54 @@ class Portmap < Formula
 
   desc "Unified local development gateway and split-DNS remote access"
   homepage "https://github.com/ylang-ylang/portmap"
-  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.12.tar.gz"
-  version "0.12.0"
-  sha256 "c03cbb8ba07a9acf3567e5fe4da727ec117880ba573a7dc240283b337a43aa64"
+  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.13.tar.gz"
+  version "0.13.0"
+  sha256 "9d14fa2ae8f8db2f0d35869773d8a1ca78490aad128e93d4f7f7f447d2d258c3"
   license "MIT"
 
+  depends_on :linux
+  depends_on "docker"
+  depends_on "docker-compose"
   depends_on "python@3.12"
 
+  allow_network_access! [:build, :postinstall]
+
+  resource "brew-setup" do
+    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/3488ca8a13aef7250f65b6d2d31386c13efd50f9/libexec/portmap_brew_setup.py"
+    sha256 "b8cc345efd08c4ff1ac945e091f1a9f2c7f6922ed061aa3746832e8e230dfadd"
+  end
+
+  resource "brew-postinstall" do
+    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/3488ca8a13aef7250f65b6d2d31386c13efd50f9/libexec/portmap_brew_postinstall.py"
+    sha256 "909b2a593059a316c68b722bcc05e36ae1160b2d6baeddcf8593c762b493d45e"
+  end
+
   def install
-    virtualenv_install_with_resources
+    virtualenv_install_with_resources without: ["brew-setup", "brew-postinstall"]
+    resource("brew-setup").stage { libexec.install "portmap_brew_setup.py" }
+    resource("brew-postinstall").stage { libexec.install "portmap_brew_postinstall.py" }
+  end
+
+  post_install_steps do
+    run "bin/python",
+        args: ["{{libexec}}/portmap_brew_postinstall.py",
+               "--brew-prefix", "{{HOMEBREW_PREFIX}}",
+               "--formula-prefix", "{{opt_prefix}}"],
+        base: :libexec,
+        print_stdout: true
   end
 
   def caveats
     <<~EOS
-      Setup requires a running Docker or rootless Podman API and a Docker Compose v2 client.
-      DNS and HTTP engines run in containers; no host CoreDNS or Traefik is required.
-      Installation does not configure DNS, publish projects, or enable boot services.
-      Run `portmap setup` as your ordinary login user before `portmap up`.
+      Installation initializes portmap using your existing local Docker or Podman API.
+      Docker is preferred when both are available; explicit portmap settings take precedence.
+      Brew supplies Docker/Compose clients, not a container engine. An unavailable API
+      or failed setup makes installation fail rather than reporting a ready gateway.
+
+      Successful installation serves http://127.0.0.1/ (or your configured HTTP port).
+      Setup runs as your ordinary user, requesting sudo only for scoped DNS/HTTP setup.
+      It preserves saved connections and does not publish projects or enable boot services.
+      To repeat installation and recovery: brew reinstall ylang-ylang/tap/portmap
     EOS
   end
 
