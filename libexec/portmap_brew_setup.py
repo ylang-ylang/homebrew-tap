@@ -16,7 +16,6 @@ import json
 import os
 from pathlib import Path
 import pwd
-import secrets
 import shlex
 import stat
 import subprocess
@@ -245,13 +244,11 @@ def main() -> int:
 
     target = remove_owned_launcher(paths, user)
     try:
-        # Scope mode returns the CLI result while its agent/SSH children keep
-        # their own lifetime, outside the waited installer service's cgroup.
-        scope = f"portmap-{user.uid}-{os.getpid()}-{secrets.token_hex(4)}.scope"
-        result = subprocess.run([
-            "systemd-run", "--user", "--scope", "--collect", "--quiet", f"--unit={scope}",
-            str(cli), "setup",
-        ], env=env, text=True, stdout=subprocess.PIPE, check=True)
+        # Core setup adopts its own PID into a system-manager scope before
+        # spawning workers, so they also outlive the user manager's shutdown.
+        result = subprocess.run(
+            [str(cli), "setup"], env=env, text=True, stdout=subprocess.PIPE, check=True,
+        )
         print(result.stdout, end="", flush=True)
         state = json.loads(result.stdout)
         port = state["gateway"]["http_port"]
