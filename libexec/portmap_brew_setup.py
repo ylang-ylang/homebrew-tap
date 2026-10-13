@@ -70,7 +70,14 @@ def adopt_configured_docker_group(user: Identity) -> None:
         return
     note("Using the Docker group access already granted to this user")
     command = shlex.join([sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]])
-    os.execvp("sg", ["sg", "docker", "-c", command])
+    # Debian-family systems ship sg; util-linux on Arch/Manjaro provides
+    # newgrp with -c instead. Never pick an unrelated user-PATH "sg" command.
+    program = Path("/usr/bin/sg")
+    if not _executable(program):
+        program = Path("/usr/bin/newgrp")
+    if not _executable(program):
+        raise SetupError("the user manager needs refreshed Docker group access, but sg/newgrp is unavailable")
+    os.execv(program, [str(program), "docker", "-c", command])
 
 
 def classify_launcher(paths, user: Identity) -> str | None:

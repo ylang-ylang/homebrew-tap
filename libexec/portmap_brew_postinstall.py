@@ -11,8 +11,36 @@ import argparse
 import errno
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
+
+
+def set_terminal_group(terminal: int, group: int) -> None:
+    blocked = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTTOU})
+    try:
+        os.tcsetpgrp(terminal, group)
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, blocked)
+
+
+def run_activation(command: list[str], environment: dict[str, str], terminal: int | None) -> int:
+    # Homebrew launches a structured step in a background process group.
+    # Hand it the sandbox terminal while systemd-run forwards its PTY;
+    # otherwise terminal reads/ioctls stop it with SIGTTIN/SIGTTOU.
+    previous = os.tcgetpgrp(terminal) if terminal is not None else None
+    try:
+        if terminal is not None:
+            set_terminal_group(terminal, os.getpgrp())
+        result = subprocess.run(
+            command, env=environment, check=False,
+            stdin=terminal if terminal is not None else subprocess.DEVNULL,
+            stdout=terminal, stderr=terminal,
+        )
+        return result.returncode if result.returncode >= 0 else 128 - result.returncode
+    finally:
+        if terminal is not None:
+            set_terminal_group(terminal, previous)
 
 
 def main() -> int:
@@ -64,12 +92,7 @@ def main() -> int:
         "--formula-prefix", args.formula_prefix,
     ])
     try:
-        result = subprocess.run(
-            command, env=environment, check=False,
-            stdin=terminal if terminal is not None else subprocess.DEVNULL,
-            stdout=terminal, stderr=terminal,
-        )
-        return result.returncode if result.returncode >= 0 else 128 - result.returncode
+        return run_activation(command, environment, terminal)
     finally:
         if terminal is not None:
             os.close(terminal)
