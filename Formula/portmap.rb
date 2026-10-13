@@ -3,40 +3,43 @@ class Portmap < Formula
 
   desc "Unified local development gateway and split-DNS remote access"
   homepage "https://github.com/ylang-ylang/portmap"
-  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.11.tar.gz"
-  version "0.11.0"
-  sha256 "10f01c4cce164d8c12103b25f73784c8322b140341351f165fb9904db3fac75d"
+  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.12.tar.gz"
+  version "0.12.0"
+  sha256 "c03cbb8ba07a9acf3567e5fe4da727ec117880ba573a7dc240283b337a43aa64"
   license "MIT"
 
   depends_on "python@3.12"
-  depends_on "coredns"
-  depends_on "traefik"
 
   def install
     virtualenv_install_with_resources
   end
 
+  def caveats
+    <<~EOS
+      Setup requires a running Docker or rootless Podman API and a Docker Compose v2 client.
+      DNS and HTTP engines run in containers; no host CoreDNS or Traefik is required.
+      Installation does not configure DNS, publish projects, or enable boot services.
+      Run `portmap setup` as your ordinary login user before `portmap up`.
+    EOS
+  end
+
   test do
+    ENV["PORTMAP_STATE_DIR"] = (testpath/"state").to_s
     (testpath/"compose.json").write '{"services":{"web":{"expose":["8000"]}}}'
-    (testpath/"endpoints.toml").write <<~EOS
+    (testpath/".portmap").mkpath
+    endpoint_config = testpath/".portmap/endpoints.toml"
+    configured = <<~EOS
       [endpoints.web]
       kind = "http"
       service = "web"
       container_port = 8000
     EOS
-    system bin/"portmap", "generate",
-           "--compose-json", testpath/"compose.json",
-           "--config", testpath/"endpoints.toml",
+    endpoint_config.write configured
+
+    system bin/"portmap", "init",
            "--project-dir", testpath,
-           "--out-dir", testpath/"generated",
-           "--repo-id", "brew-test",
-           "--repo-name", "demo",
-           "--branch", "test",
-           "--host-ip", "127.0.0.1",
-           "--http-port", "8080",
-           "--domain-suffix", "brew.portmap"
-    result = JSON.parse((testpath/"generated/state.json").read)
-    assert_equal "http://web.test.demo.brew.portmap:8080",
-                 result.fetch("endpoints").fetch("web").fetch("url")
+           "--compose-file", "compose.json"
+    assert_equal configured, endpoint_config.read
+    refute_path_exists testpath/"state/client/infrastructure.json"
   end
 end
