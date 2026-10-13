@@ -5,7 +5,7 @@ class Portmap < Formula
   homepage "https://github.com/ylang-ylang/portmap"
   url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.12.tar.gz"
   version "0.12.0"
-  revision 1
+  revision 2
   sha256 "c03cbb8ba07a9acf3567e5fe4da727ec117880ba573a7dc240283b337a43aa64"
   license "MIT"
 
@@ -17,13 +17,13 @@ class Portmap < Formula
   allow_network_access! [:build, :postinstall]
 
   resource "brew-setup" do
-    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/7c64aa52a6c5c819140ec45f5e46b9cb34c543db/libexec/portmap_brew_setup.py"
-    sha256 "165316b030925443fc5b222f9b4c2c315956261e82e210af4b77abc8ceba5351"
+    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/9f7652b810c75e4f2ba4701bfcc93b5032727cdf/libexec/portmap_brew_setup.py"
+    sha256 "d565d095a2633860afc5aab434b39269e9141fc98ba57d8da8873cd3130fabb6"
   end
 
   resource "brew-postinstall" do
-    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/7c64aa52a6c5c819140ec45f5e46b9cb34c543db/libexec/portmap_brew_postinstall.py"
-    sha256 "facf521596b210e79d818fc052299a867064a8dbd1b0ecf751711ec185628e2c"
+    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/9f7652b810c75e4f2ba4701bfcc93b5032727cdf/libexec/portmap_brew_postinstall.py"
+    sha256 "909b2a593059a316c68b722bcc05e36ae1160b2d6baeddcf8593c762b493d45e"
   end
 
   def install
