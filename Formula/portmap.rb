@@ -3,9 +3,9 @@ class Portmap < Formula
 
   desc "Unified local development gateway and split-DNS remote access"
   homepage "https://github.com/ylang-ylang/portmap"
-  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.13.tar.gz"
-  version "0.13.0"
-  sha256 "9d14fa2ae8f8db2f0d35869773d8a1ca78490aad128e93d4f7f7f447d2d258c3"
+  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.14.tar.gz"
+  version "0.14.0"
+  sha256 "377fd8918dd4efd0668025429bc588842b644e4d0c538c634a257fe0fdc7c38a"
   license "MIT"
 
   depends_on :linux
@@ -16,13 +16,13 @@ class Portmap < Formula
   allow_network_access! [:build, :postinstall]
 
   resource "brew-setup" do
-    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/3488ca8a13aef7250f65b6d2d31386c13efd50f9/libexec/portmap_brew_setup.py"
-    sha256 "b8cc345efd08c4ff1ac945e091f1a9f2c7f6922ed061aa3746832e8e230dfadd"
+    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/12f2701bcbfb39c4825e39e8ce612767ede4a16a/libexec/portmap_brew_setup.py"
+    sha256 "bc68d3a6b182b9732cd6b4b9220cb6b676f8fda4adbc2a7e4568944e53b16575"
   end
 
   resource "brew-postinstall" do
-    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/3488ca8a13aef7250f65b6d2d31386c13efd50f9/libexec/portmap_brew_postinstall.py"
-    sha256 "909b2a593059a316c68b722bcc05e36ae1160b2d6baeddcf8593c762b493d45e"
+    url "https://raw.githubusercontent.com/ylang-ylang/homebrew-tap/12f2701bcbfb39c4825e39e8ce612767ede4a16a/libexec/portmap_brew_postinstall.py"
+    sha256 "03812f2fd81bbc2a35e4a6f2aee9473b8f8ea529fa594ad230aeff758ff00fe6"
   end
 
   def install
