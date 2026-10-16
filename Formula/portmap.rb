@@ -42,14 +42,27 @@ class Portmap < Formula
 
   def caveats
     <<~EOS
-      Installation initializes portmap using your existing local Docker or Podman API.
-      Docker is preferred when both are available; explicit portmap settings take precedence.
-      Brew supplies Docker/Compose clients, not a container engine. An unavailable API
-      or failed setup makes installation fail rather than reporting a ready gateway.
+      Installation uses your existing local Docker or Podman API (Docker is
+      preferred when both are available; explicit portmap settings take
+      precedence). Homebrew supplies the Docker/Compose clients, never a
+      container engine, and no Compose plugin wiring is needed: portmap
+      locates the installed client itself. When setup runs, an unavailable
+      API or failed setup is an error, never a ready gateway.
 
-      Successful installation serves http://127.0.0.1/ (or your configured HTTP port).
-      Setup runs as your ordinary user, requesting sudo only for scoped DNS/HTTP setup.
-      It preserves saved connections and does not publish projects or enable boot services.
+      Where a systemd user service manager runs the setup, successful
+      installation serves http://127.0.0.1/ (or your configured HTTP port).
+      Without one the install finishes honestly not started; run "portmap run"
+      (foreground) or "portmap setup" yourself - Homebrew never leaves an
+      unmanaged background process behind.
+
+      Setup runs as your ordinary user and requests sudo only when resolver
+      files or a retained legacy host adapter require it. Container publication
+      uses the runtime's existing permissions; unavailable ports 53 or 80 fail
+      without changing policy or silently selecting higher ports. Setup preserves
+      saved connections and does not publish projects or enable boot services.
+      After a rebuilt workspace or a changed runtime environment, rerun the
+      same standard entry ("portmap setup" or "portmap run"): it re-verifies
+      the container API before creating or changing portmap-owned containers.
       To repeat installation and recovery: brew reinstall ylang-ylang/tap/portmap
     EOS
   end

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Initialize portmap against an existing Docker or Podman API.
 
-The formula activates this as an ordinary-user service. It never installs,
-starts, enables or reconfigures a container engine, and never publishes a
-business project. Runtime selection is the portmap CLI's existing policy.
+The installer invokes this outside its build sandbox, directly or through a
+usable user service manager. It never installs, starts, enables or reconfigures
+a container engine, and never publishes a business project.
 """
 from __future__ import annotations
 
@@ -53,7 +53,10 @@ def identity() -> Identity:
     data = Path(os.environ.get("XDG_DATA_HOME") or home / ".local/share")
     if not data.is_absolute():
         raise SetupError("XDG_DATA_HOME must be absolute")
-    return Identity(user.pw_uid, user.pw_name, home, home / ".config", data, Path(f"/run/user/{user.pw_uid}"))
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{user.pw_uid}")
+    if not runtime.is_absolute():
+        raise SetupError("XDG_RUNTIME_DIR must be absolute")
+    return Identity(user.pw_uid, user.pw_name, home, home / ".config", data, runtime)
 
 
 def adopt_configured_docker_group(user: Identity) -> None:
@@ -130,30 +133,6 @@ def restore_launcher(paths, target: str) -> None:
         note(f"Not restoring {paths.launcher}: another file now occupies that path")
     except OSError as exc:
         note(f"Could not restore {paths.launcher}: {exc}")
-
-
-def ensure_compose(prefix: Path, env: dict[str, str]) -> None:
-    docker = prefix / "opt/docker/bin/docker"
-    command = [str(docker), "compose", "version"]
-    probe = subprocess.run(command, env=env, capture_output=True, text=True, check=False)
-    if probe.returncode == 0:
-        return
-    directory = Path(env.get("DOCKER_CONFIG") or Path(env["HOME"]) / ".docker")
-    plugin = directory / "cli-plugins/docker-compose"
-    if os.path.lexists(plugin):
-        raise SetupError(f"Compose is unavailable and {plugin} already exists; refusing to overwrite it")
-    plugin.parent.mkdir(parents=True, exist_ok=True)
-    plugin.symlink_to(prefix / "opt/docker-compose/bin/docker-compose")
-    subprocess.run(command, env=env, check=True)
-
-
-def ensure_sudo(env: dict[str, str]) -> None:
-    probe = subprocess.run(["sudo", "-n", "true"], env=env, capture_output=True, text=True, check=False)
-    if probe.returncode == 0:
-        return
-    if not sys.stdin.isatty():
-        raise SetupError(f"scoped DNS/HTTP setup needs sudo authorization; run the installation in a terminal: {probe.stderr.strip()}")
-    subprocess.run(["sudo", "-v"], env=env, check=True)
 
 
 class PageAssets(HTMLParser):
@@ -239,13 +218,10 @@ def main() -> int:
                DOCKER_HOST=f"unix://{runtime.socket_path}")
     for key in ("DOCKER_CONTEXT", "DOCKER_TLS_VERIFY", "DOCKER_CERT_PATH"):
         env.pop(key, None)
-    ensure_compose(args.brew_prefix, env)
-    ensure_sudo(env)
 
     target = remove_owned_launcher(paths, user)
     try:
-        # Core setup adopts its own PID into a system-manager scope before
-        # spawning workers, so they also outlive the user manager's shutdown.
+        # Core setup owns worker lifetimes and requests sudo only where needed.
         result = subprocess.run(
             [str(cli), "setup"], env=env, text=True, stdout=subprocess.PIPE, check=True,
         )

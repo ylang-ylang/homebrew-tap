@@ -1,14 +1,19 @@
 import fcntl
 import importlib.util
+import io
+import contextlib
 import json
 import os
 from pathlib import Path
 import pty
 import signal
+import socket
+import tempfile
 import subprocess
 import sys
 import termios
 import unittest
+from unittest.mock import patch
 
 
 HELPER = Path(__file__).resolve().parents[1] / "libexec/portmap_brew_postinstall.py"
@@ -65,6 +70,53 @@ class PostinstallTerminalTests(unittest.TestCase):
         self.assertTrue(report["caller_was_background"])
         self.assertEqual(report["command_exit"], 0)
         self.assertTrue(report["foreground_restored"])
+
+
+class ActivationDecisionTests(unittest.TestCase):
+    def detected_manager(self, *, with_run: bool, with_bus: bool, manager_status: int = 0) -> bool:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            systemd_run = root / "systemd-run"
+            user_bus = root / "bus"
+            if with_run:
+                systemd_run.write_text("#!/bin/sh\nexit 0\n")
+                systemd_run.chmod(0o755)
+                systemctl = root / "systemctl"
+                systemctl.write_text("#!/bin/sh\nexit 0\n")
+                systemctl.chmod(0o755)
+            listener = None
+            if with_bus:
+                listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                listener.bind(str(user_bus))
+            try:
+                with patch.object(bootstrap.subprocess, "run", return_value=subprocess.CompletedProcess([], manager_status)):
+                    return bootstrap.user_service_manager(systemd_run=systemd_run, user_bus=user_bus)
+            finally:
+                if listener is not None:
+                    listener.close()
+
+    def test_activation_requires_both_systemd_run_and_the_user_bus(self):
+        self.assertTrue(self.detected_manager(with_run=True, with_bus=True))
+        self.assertFalse(self.detected_manager(with_run=False, with_bus=True))
+        self.assertFalse(self.detected_manager(with_run=True, with_bus=False))
+
+    def test_user_bus_without_a_running_systemd_manager_does_not_activate(self):
+        self.assertFalse(self.detected_manager(with_run=True, with_bus=True, manager_status=1))
+
+
+    def test_main_reports_not_started_without_activation_when_systemd_is_absent(self):
+        output = io.StringIO()
+        argv = sys.argv
+        sys.argv = ["portmap_brew_postinstall.py", "--brew-prefix", "/brew", "--formula-prefix", "/opt/portmap"]
+        try:
+            with patch.object(bootstrap, "user_service_manager", return_value=False), \
+                    patch.object(bootstrap, "run_activation") as activation, contextlib.redirect_stdout(output):
+                code = bootstrap.main()
+        finally:
+            sys.argv = argv
+        self.assertEqual(code, 0)
+        activation.assert_not_called()
+
 
 
 if __name__ == "__main__":

@@ -4,6 +4,9 @@
 Homebrew keeps its package-install sandbox. User setup runs as a waited,
 transient user service, not inside the build sandbox or as root. Its result
 is the post-install result; a failed setup cannot become a successful install.
+Without a systemd user service manager there is no honest way to run that
+activation from the sandbox, so the install reports itself as not started
+with the concrete manual commands instead of failing or pretending.
 """
 from __future__ import annotations
 
@@ -43,6 +46,46 @@ def run_activation(command: list[str], environment: dict[str, str], terminal: in
             set_terminal_group(terminal, previous)
 
 
+SYSTEMD_RUN = Path("/usr/bin/systemd-run")
+
+
+def user_service_manager(*, systemd_run: Path = SYSTEMD_RUN, user_bus: Path | None = None) -> bool:
+    """Require a live user manager, not just a client binary or D-Bus socket."""
+    if user_bus is None:
+        user_bus = Path(f"/run/user/{os.getuid()}/bus")
+    systemctl = systemd_run.with_name("systemctl")
+    if not (
+        systemd_run.is_file() and os.access(systemd_run, os.X_OK)
+        and systemctl.is_file() and os.access(systemctl, os.X_OK)
+        and user_bus.is_socket()
+    ):
+        return False
+    environment = dict(os.environ)
+    environment["XDG_RUNTIME_DIR"] = str(user_bus.parent)
+    environment["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path={user_bus}"
+    try:
+        result = subprocess.run(
+            [str(systemctl), "--user", "show-environment"],
+            env=environment, stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=3, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
+def not_started_notice() -> str:
+    return (
+        "portmap is installed; automatic setup was not run because a usable\n"
+        "systemd user service manager is unavailable. Existing services and\n"
+        "configuration were left unchanged. Start or initialize portmap with:\n"
+        "  portmap run      foreground session\n"
+        "  portmap setup    background operation\n"
+        "Readiness has not been checked; use portmap status --check."
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--brew-prefix", required=True)
@@ -51,6 +94,9 @@ def main() -> int:
     if os.getuid() == 0 or os.geteuid() == 0:
         parser.error("install portmap as your ordinary login user, not with sudo")
 
+    if not user_service_manager():
+        print(not_started_notice(), flush=True)
+        return 0
     runtime = f"/run/user/{os.getuid()}"
     environment = dict(os.environ)
     environment["XDG_RUNTIME_DIR"] = runtime
