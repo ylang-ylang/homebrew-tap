@@ -3,9 +3,9 @@ class Portmap < Formula
 
   desc "Unified local development gateway and split-DNS remote access"
   homepage "https://github.com/ylang-ylang/portmap"
-  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.17.tar.gz"
-  version "0.17.0"
-  sha256 "48bdde2b52c31ddf7926f12e5439af9ef5b08019343282c6f89c2693ab2d5098"
+  url "https://github.com/ylang-ylang/portmap/archive/refs/tags/V0.18.tar.gz"
+  version "0.18.0"
+  sha256 "4fe133712f5a25cbd239af358f652bf61dcd4a543e4bd249258980c638d5b441"
   license "MIT"
 
   depends_on :linux
