@@ -1,0 +1,34 @@
+# Tap checks for ylang-ylang/homebrew-tap.
+#
+# The release-distribution workflow in ylang-ylang/portmap opens formula
+# update PRs and merges them ONLY after this check is green, so the job id
+# and name MUST stay exactly "tap-checks" (the required-check name) and the
+# runner MUST stay Linux (the formula targets linux-amd64 and its unit
+# tests assume a POSIX toolchain).
+
+name: tap-checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tap-checks:
+    name: tap-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Formula Ruby syntax
+        run: ruby -c Formula/portmap.rb
+
+      - name: Tap unit tests
+        run: python3 -m unittest discover -s tests -v
