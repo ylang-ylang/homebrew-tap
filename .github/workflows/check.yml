@@ -20,7 +20,7 @@ jobs:
   tap-checks:
     name: tap-checks
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Checkout tap
         uses: actions/checkout@v4
@@ -28,7 +28,25 @@ jobs:
           persist-credentials: false
 
       - name: Formula Ruby syntax
-        run: ruby -c Formula/portmap.rb
+        run: |
+          for formula in Formula/*.rb; do
+            ruby -c "$formula"
+          done
 
       - name: Tap unit tests
         run: python3 -m unittest discover -s tests -v
+
+      - name: Set up Homebrew for Git Guard
+        if: hashFiles('Formula/git-guard.rb') != ''
+        uses: Homebrew/actions/setup-homebrew@4790763c0a3ba4036f72634dc079c4a7dfcd4878
+
+      - name: Install and exercise Git Guard
+        if: hashFiles('Formula/git-guard.rb') != ''
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+        run: |
+          brew install --build-from-source ylang-ylang/tap/git-guard
+          brew test ylang-ylang/tap/git-guard
+          brew reinstall --build-from-source ylang-ylang/tap/git-guard
+          brew test ylang-ylang/tap/git-guard
