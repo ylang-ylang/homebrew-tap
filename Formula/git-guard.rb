@@ -3,9 +3,9 @@ class GitGuard < Formula
 
   desc "Enforce Git branch-flow policies from Mermaid documents"
   homepage "https://github.com/ylang-ylang/gitguard"
-  url "https://github.com/ylang-ylang/gitguard/releases/download/V1.18/git_guard-1.18.tar.gz"
-  version "1.18"
-  sha256 "0316a093bda711e43786c4f9697fe258b5a2da7783adadde75c4e9f86789938f"
+  url "https://github.com/ylang-ylang/gitguard/releases/download/V1.19/git_guard-1.19.tar.gz"
+  version "1.19"
+  sha256 "1c10ab3c593bc483e1580006c5b9db829304b5471024288c14c14f31081b722e"
   license "AGPL-3.0-only"
 
   depends_on "python-setuptools" => :build
