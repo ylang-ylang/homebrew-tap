@@ -3,9 +3,9 @@ class Openpaper < Formula
 
   desc "Self-hosted AI research assistant"
   homepage "https://github.com/ylang-ylang/openpaper"
-  url "https://github.com/ylang-ylang/openpaper/archive/refs/tags/V0.1.tar.gz"
-  version "0.1"
-  sha256 "d6d690a30c2ef5030ae31dabdfbf2c08a888ef8ebef405f34dfb5bb54b3907e5"
+  url "https://github.com/ylang-ylang/openpaper/archive/refs/tags/V0.2.tar.gz"
+  version "0.2"
+  sha256 "bf0eda1881a1ae5a51d8200dcddbd0af7c0d8de04cec4adc35c73af6d194f7b7"
   license "AGPL-3.0-only"
 
   depends_on :linux
@@ -49,8 +49,8 @@ class Openpaper < Formula
         env: {
           "OPENPAPER_DOCKER_COMPOSE" => (Formula["docker-compose"].opt_bin/"docker-compose").to_s,
           "OPENPAPER_DOCKER_BUILDX" => (Formula["docker-buildx"].opt_bin/"docker-buildx").to_s,
-          "OPENPAPER_BREW_SKIP_SETUP" => ENV.fetch("OPENPAPER_BREW_SKIP_SETUP", "0"),
-          "OPENPAPER_STATE_DIR" => ENV.fetch("OPENPAPER_STATE_DIR", ""),
+          "HOMEBREW_OPENPAPER_SKIP_SETUP" => ENV.fetch("HOMEBREW_OPENPAPER_SKIP_SETUP", "0"),
+          "OPENPAPER_STATE_DIR" => ENV.fetch("HOMEBREW_OPENPAPER_STATE_DIR", ""),
         },
         print_stdout: true,
         network_access: true
@@ -67,7 +67,8 @@ class Openpaper < Formula
         openpaper brew-setup
 
       Automated packaging can skip post-install startup without touching real
-      state by setting OPENPAPER_BREW_SKIP_SETUP=1.
+      state by setting HOMEBREW_OPENPAPER_SKIP_SETUP=1. To use isolated state
+      during installation, set HOMEBREW_OPENPAPER_STATE_DIR to its absolute path.
     EOS
   end
 
