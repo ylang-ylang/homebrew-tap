@@ -31,6 +31,22 @@ class CodoxearHub < Formula
       exec "#{Formula["node"].opt_bin}/node" "#{libexec}/hub/dist/main.js" "$@"
     SH
 
+    (bin/"codoxear-hub-pair").write <<~SH
+      #!/bin/bash
+      # Issue a Computer pairing code without the web UI:
+      #   codoxear-hub-pair <computer-name>
+      set -euo pipefail
+      CONF="${CODOXEAR_HUB_CONFIG:-#{var}/codoxear-hub/hub.json}"
+      TOKEN="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("adminToken",""))' "$CONF")"
+      ORIGIN="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["origin"])' "$CONF")"
+      if [ -z "$TOKEN" ]; then echo "no adminToken in $CONF" >&2; exit 1; fi
+      if [ $# -lt 1 ]; then echo "usage: codoxear-hub-pair <computer-name>" >&2; exit 2; fi
+      curl -sf -X POST "$ORIGIN/api/admin/computers" \
+        -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+        -d "{\"name\": \"$1\"}"
+      echo
+    SH
+
     (bin/"codoxear-hub-init").write <<~SH
       #!/bin/bash
       set -euo pipefail
@@ -44,6 +60,7 @@ class CodoxearHub < Formula
       PORT="${2:-17430}"
       INIT_TOKEN="$(openssl rand -hex 16)"
       HUB_ID="$(openssl rand -hex 8)"
+      ADMIN_TOKEN="$(openssl rand -hex 24)"
       EXPIRES_AT="$(($(date +%s) * 1000 + 86400000))"
       cat > "$DIR/hub.json" <<JSON
       {
@@ -61,6 +78,7 @@ class CodoxearHub < Formula
         "listenHost": "0.0.0.0",
         "listenPort": $PORT,
         "secureCookies": false,
+        "adminToken": "$ADMIN_TOKEN",
         "initialization": { "token": "$INIT_TOKEN", "expiresAt": $EXPIRES_AT },
         "providers": []
       }
