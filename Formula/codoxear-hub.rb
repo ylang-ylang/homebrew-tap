@@ -43,7 +43,9 @@ class CodoxearHub < Formula
       if [ $# -lt 1 ]; then echo "usage: codoxear-hub-pair <computer-name>" >&2; exit 2; fi
       curl -sf -X POST "$ORIGIN/api/admin/computers" \
         -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-        -d "{\"name\": \"$1\"}"
+        --data-binary @- <<JSON
+      {"name": "$1"}
+      JSON
       echo
     SH
 
