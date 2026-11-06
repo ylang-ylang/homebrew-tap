@@ -6,7 +6,7 @@ class CodoxearHub < Formula
       revision: "181dfbb90980876db08be596a274345a565d177d"
   version "0.1.0-preview.2"
   license "MIT"
-  revision 1
+  revision 2
 
   depends_on "python@3.13" => :build
   depends_on "node"
@@ -21,7 +21,9 @@ class CodoxearHub < Formula
     cd "src/frontend" do
       system "npm", "ci"
       # LAN build: CSP allows plain-HTTP hubs (see build.mjs).
-      system({ "CODOXEAR_LAN_CSP" => "1" }, "npm", "run", "build")
+      with_env("CODOXEAR_LAN_CSP" => "1") do
+        system "npm", "run", "build"
+      end
       (share/"codoxear-hub/frontend-assets").install Dir["dist/client/*", "dist/hub", "dist/identity", "dist/workspace"]
     end
 

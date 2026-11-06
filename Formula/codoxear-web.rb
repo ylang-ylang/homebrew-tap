@@ -6,7 +6,7 @@ class CodoxearWeb < Formula
       revision: "181dfbb90980876db08be596a274345a565d177d"
   version "0.1.0-preview.3"
   license "MIT"
-  revision 1
+  revision 2
 
   depends_on "python@3.13" => :build
   depends_on "node"
@@ -15,7 +15,9 @@ class CodoxearWeb < Formula
     cd "src/frontend" do
       system "npm", "ci"
       # LAN build: CSP allows plain-HTTP hubs (see build.mjs).
-      system({ "CODOXEAR_LAN_CSP" => "1" }, "npm", "run", "build")
+      with_env("CODOXEAR_LAN_CSP" => "1") do
+        system "npm", "run", "build"
+      end
       (libexec/"frontend").install "serve.mjs"
       (libexec/"frontend").install "dist"
     end
