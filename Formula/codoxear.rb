@@ -7,7 +7,7 @@ class Codoxear < Formula
   # (ylang-ylang/codoxear tag v0.1.0-fed.2 = upstream e42cfe6 + federation).
   url "https://github.com/ylang-ylang/codoxear/archive/refs/tags/v0.1.0-fed.2.tar.gz"
   version "0.1.0.fed.2"
-  sha256 "b3a09f66857ca01a02c286b64f5cc9cb24abb75057074706645e84137b7a78"
+  sha256 "b3a09f66857ca01a02c286b64f3f5cc9cb24abb75057074706645e84137b7a78"
   license "MIT"
   head "https://github.com/yiwenlu66/codoxear.git", branch: "main"
 
