@@ -20,7 +20,7 @@ class CodoxearHub < Formula
     cd "src/frontend" do
       system "npm", "ci"
       system "npm", "run", "build"
-      (share/"codoxear-hub/frontend-assets").install Dir["dist/client/*"]
+      (share/"codoxear-hub/frontend-assets").install Dir["dist/client/*", "dist/hub", "dist/identity", "dist/workspace"]
     end
 
     (bin/"codoxear-hub").write <<~SH
@@ -44,6 +44,7 @@ class CodoxearHub < Formula
       PORT="${2:-17430}"
       INIT_TOKEN="$(openssl rand -hex 16)"
       HUB_ID="$(openssl rand -hex 8)"
+      EXPIRES_AT="$(($(date +%s) * 1000 + 86400000))"
       cat > "$DIR/hub.json" <<JSON
       {
         "independent": true,
@@ -60,7 +61,7 @@ class CodoxearHub < Formula
         "listenHost": "0.0.0.0",
         "listenPort": $PORT,
         "secureCookies": false,
-        "initialization": { "token": "$INIT_TOKEN", "expiresAt": 0 },
+        "initialization": { "token": "$INIT_TOKEN", "expiresAt": $EXPIRES_AT },
         "providers": []
       }
       JSON
