@@ -6,7 +6,7 @@ class Codoxear < Formula
       revision: "4ec4758d2f7cf785b60993590c1b50457e7d7a29"
   version "0.1.0-preview.2"
   license "MIT"
-  revision 1
+  revision 2
 
   depends_on "gcc" => :build # node-pty/koffi native builds
   depends_on "pkgconf" => :build
@@ -42,6 +42,8 @@ class Codoxear < Formula
   service do
     run [opt_bin/"codoxear-computer", "start"]
     working_dir var/"codoxear"
+    environment_variable CODOXEAR_COMPUTER_CONTROL_SOCKET: "#{var}/codoxear/computer-control.sock",
+                         CODOXEAR_DEFAULT_WORKSPACE:       "#{ENV["HOME"]}/ylangs_ws"
     keep_alive true
     log_path var/"log/codoxear-computer.log"
     error_log_path var/"log/codoxear-computer.error.log"
