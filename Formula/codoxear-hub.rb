@@ -3,7 +3,7 @@ class CodoxearHub < Formula
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "1dc1600983cb72a01eb9793da327a603fb727843"
+      revision: "181dfbb90980876db08be596a274345a565d177d"
   version "0.1.0-preview.2"
   license "MIT"
 
@@ -19,7 +19,8 @@ class CodoxearHub < Formula
     end
     cd "src/frontend" do
       system "npm", "ci"
-      system "npm", "run", "build"
+      # LAN build: CSP allows plain-HTTP hubs (see build.mjs).
+      system({ "CODOXEAR_LAN_CSP" => "1" }, "npm", "run", "build")
       (share/"codoxear-hub/frontend-assets").install Dir["dist/client/*", "dist/hub", "dist/identity", "dist/workspace"]
     end
 

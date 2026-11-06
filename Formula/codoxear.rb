@@ -3,7 +3,7 @@ class Codoxear < Formula
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "1dc1600983cb72a01eb9793da327a603fb727843"
+      revision: "181dfbb90980876db08be596a274345a565d177d"
   version "0.1.0-preview.2"
   license "MIT"
 
