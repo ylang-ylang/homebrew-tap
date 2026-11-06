@@ -6,6 +6,7 @@ class CodoxearWeb < Formula
       revision: "181dfbb90980876db08be596a274345a565d177d"
   version "0.1.0-preview.3"
   license "MIT"
+  revision 1
 
   depends_on "python@3.13" => :build
   depends_on "node"
