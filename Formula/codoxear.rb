@@ -4,10 +4,10 @@ class Codoxear < Formula
   desc "Unofficial mobile handoff for Codex TUI sessions"
   homepage "https://github.com/yiwenlu66/codoxear"
   # Temporarily tracks the federation fork branch until upstream merges
-  # (ylang-ylang/codoxear tag v0.1.0-fed.2 = upstream e42cfe6 + federation).
-  url "https://github.com/ylang-ylang/codoxear/archive/refs/tags/v0.1.0-fed.2.tar.gz"
-  version "0.1.0.fed.2"
-  sha256 "b3a09f66857ca01a02c286b64f3f5cc9cb24abb75057074706645e84137b7a78"
+  # (ylang-ylang/codoxear tag v0.1.0-fed.3 = upstream e42cfe6 + federation).
+  url "https://github.com/ylang-ylang/codoxear/archive/refs/tags/v0.1.0-fed.3.tar.gz"
+  version "0.1.0.fed.3"
+  sha256 "3b319d2d790e732100548d5cb2e5964f48b2926f0a3c13b61783eefca406c3fd"
   license "MIT"
   head "https://github.com/yiwenlu66/codoxear.git", branch: "main"
 
