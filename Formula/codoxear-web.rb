@@ -3,8 +3,8 @@ class CodoxearWeb < Formula
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "c3c9b3203dab901b1b83663f0fac7f29fd1c50d2"
-  version "0.1.0-preview.1"
+      revision: "1dc1600983cb72a01eb9793da327a603fb727843"
+  version "0.1.0-preview.2"
   license "MIT"
 
   depends_on "python@3.13" => :build
