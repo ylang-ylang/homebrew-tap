@@ -258,6 +258,12 @@ class Codoxear < Formula
       venv.pip_install r, build_isolation: false
     end
     venv.pip_install_and_link buildpath, build_isolation: false
+
+    # Upstream packaging bug: pyproject package-data omits static/dist/ and
+    # most of static/vendor/, so pip installs a partial UI and the page stays
+    # black. Merge the complete static tree from the source checkout (the /. form
+    # copies contents; installing the dir itself would nest as static/static).
+    cp_r "codoxear/static/.", libexec/"lib/python3.13/site-packages/codoxear/static"
   end
 
   def post_install
