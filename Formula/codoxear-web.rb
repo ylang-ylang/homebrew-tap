@@ -21,6 +21,7 @@ class CodoxearWeb < Formula
     (bin/"codoxear-web").write <<~SH
       #!/bin/bash
       export CODOXEAR_CLIENT_PORT="${CODOXEAR_CLIENT_PORT:-19520}"
+      export CODOXEAR_CLIENT_HOST="${CODOXEAR_CLIENT_HOST:-0.0.0.0}"
       exec "#{Formula["node"].opt_bin}/node" "#{libexec}/frontend/serve.mjs" "$@"
     SH
   end
