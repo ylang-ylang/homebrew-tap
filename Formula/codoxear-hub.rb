@@ -54,9 +54,9 @@ class CodoxearHub < Formula
         "catalog": "./state/hub-catalog.sqlite",
         "database": "./state/hub-sessions.sqlite",
         "signingKey": "./state/hub-signing-key.json",
-        "clientOrigins": ["http://$HOST:$PORT"],
+        "clientOrigins": ["http://$HOST:19520"],
         "clients": [
-          { "id": "codoxear-web", "redirectUris": ["http://$HOST:$PORT/auth-callback"] }
+          { "id": "codoxear-web", "redirectUris": ["http://$HOST:19520/auth-callback"] }
         ],
         "listenHost": "0.0.0.0",
         "listenPort": $PORT,
