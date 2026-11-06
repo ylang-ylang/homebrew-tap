@@ -3,10 +3,10 @@ class Codoxear < Formula
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "4ec4758d2f7cf785b60993590c1b50457e7d7a29"
+      revision: "563192ce95ab315cc685f9ac2e1d38431356e279"
   version "0.1.0-preview.2"
   license "MIT"
-  revision 3
+  revision 4
 
   depends_on "gcc" => :build # node-pty/koffi native builds
   depends_on "pkgconf" => :build
