@@ -42,8 +42,8 @@ class Codoxear < Formula
   service do
     run [opt_bin/"codoxear-computer", "start"]
     working_dir var/"codoxear"
-    environment_variable CODOXEAR_COMPUTER_CONTROL_SOCKET: "#{var}/codoxear/computer-control.sock",
-                         CODOXEAR_DEFAULT_WORKSPACE:       "#{ENV["HOME"]}/ylangs_ws"
+    environment_variables CODOXEAR_COMPUTER_CONTROL_SOCKET: "#{var}/codoxear/computer-control.sock",
+                          CODOXEAR_DEFAULT_WORKSPACE:       "#{Dir.home}/ylangs_ws"
     keep_alive true
     log_path var/"log/codoxear-computer.log"
     error_log_path var/"log/codoxear-computer.error.log"
