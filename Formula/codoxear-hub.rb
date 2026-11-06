@@ -3,10 +3,10 @@ class CodoxearHub < Formula
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "ee2aa7cf8b92ce61d01d76fe0aef680da3bc75c9"
+      revision: "4ec4758d2f7cf785b60993590c1b50457e7d7a29"
   version "0.1.0-preview.2"
   license "MIT"
-  revision 3
+  revision 4
 
   depends_on "python@3.13" => :build
   depends_on "node"
