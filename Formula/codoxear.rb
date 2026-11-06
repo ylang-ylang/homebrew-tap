@@ -6,7 +6,7 @@ class Codoxear < Formula
       revision: "4ec4758d2f7cf785b60993590c1b50457e7d7a29"
   version "0.1.0-preview.2"
   license "MIT"
-  revision 2
+  revision 3
 
   depends_on "gcc" => :build # node-pty/koffi native builds
   depends_on "pkgconf" => :build
