@@ -57,7 +57,7 @@ class Codoxear < Formula
   end
 
   def post_install
-    # Service stdout carries the one-time Owner entry link: keep it in a private directory.
+    # Service logs live in a private directory; they may contain deployment output.
     private_dir = var/"codoxear"
     private_dir.mkpath
     private_dir.chmod 0700
@@ -78,13 +78,14 @@ class Codoxear < Formula
       Start this node (the only step):
         brew services start codoxear
 
-      First start prints a private one-time Owner entry link (the directory is
-      user-private, mode 0700):
-        grep 'private one-time link' #{var}/codoxear/service.log
+      Then open http://<this machine's LAN address>:17430 in a browser and sign in
+      as admin / admin. You are asked to choose a new password right away, and
+      whoever completes that first sign-in becomes the Owner, so do it before
+      exposing the node to a network you do not trust.
 
-      Open it once, then use the Network page: connect upstream (attach to another
-      node) or connect downstream (issue a pairing code). The node derives its role
-      from its connections; there is nothing else to configure.
+      The Network page connects upstream (attach to another node) or downstream
+      (issue a pairing code). The node derives its role from its connections;
+      there is nothing else to configure.
 
       CLI: codoxear-computer status | doctor | attach | provider
     EOS
