@@ -3,7 +3,7 @@ class Codoxear < Formula
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "1ff413a5396bdacf2c8532ecb27be657926aa5c2"
+      revision: "2009620c9583009d3a3229e81fb5af11a023db80"
   version "0.2.0-preview.1"
   license "MIT"
 
@@ -79,7 +79,8 @@ class Codoxear < Formula
         brew services start codoxear
 
       Then open http://<this machine's LAN address>:17430 in a browser and sign in
-      as admin / admin. You are asked to choose a new password right away, and
+      with the starting password admin (there is no account name). You are asked
+      to choose your own password right away, and
       whoever completes that first sign-in becomes the Owner, so do it before
       exposing the node to a network you do not trust.
 
