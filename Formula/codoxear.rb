@@ -1,12 +1,11 @@
 class Codoxear < Formula
-  desc "DexGEM internal Codoxear — Computer service (agent host for a Hub)"
+  desc "Codoxear agent node: hub, computer and web in one service"
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "563192ce95ab315cc685f9ac2e1d38431356e279"
-  version "0.1.0-preview.2"
+      revision: "efc3c4c9856c5f684eccca347964f9425fccd9ec"
+  version "0.2.0-preview.1"
   license "MIT"
-  revision 4
 
   depends_on "gcc" => :build # node-pty/koffi native builds
   depends_on "pkgconf" => :build
@@ -24,50 +23,78 @@ class Codoxear < Formula
       system "npm", "run", "build"
       system "npm", "prune", "--omit=dev"
       system "npm", "prune", "--omit=dev", "--prefix", "runtime/oar"
-      libexec.install "dist", "node_modules", "runtime", "package.json"
+      (libexec/"computer").install "dist", "node_modules", "runtime", "package.json"
     end
+    cd "src/hub" do
+      system "npm", "ci"
+      system "npm", "run", "build"
+      system "npm", "prune", "--omit=dev"
+      (libexec/"hub").install "dist", "node_modules", "package.json"
+    end
+    cd "src/frontend" do
+      system "npm", "ci"
+      # LAN build: CSP allows plain-HTTP hubs (see src/frontend/build.mjs).
+      with_env(CODOXEAR_LAN_CSP: "1") { system "npm", "run", "build" }
+      (libexec/"frontend").install "dist"
+    end
+    libexec.install "deploy/node.mjs"
 
-    ["codoxear-computer", "codoxear"].each do |name|
-      (bin/name).write <<~SH
-        #!/bin/bash
-        exec "#{Formula["node"].opt_bin}/node" "#{libexec}/dist/main.js" "$@"
-      SH
-    end
+    # Agent runtime used by the in-app Feedback session; bundled so users install nothing else.
+    system "npm", "install", "--prefix", libexec/"pi", "--no-audit", "--no-fund",
+           "@earendil-works/pi-coding-agent@1.0.0"
+
+    node = Formula["node"].opt_bin/"node"
+    (bin/"codoxear").write <<~SH
+      #!/bin/bash
+      export PI_BIN="${PI_BIN:-#{opt_libexec}/pi/node_modules/.bin/pi}"
+      exec "#{node}" "#{opt_libexec}/node.mjs" "$@"
+    SH
+    (bin/"codoxear-computer").write <<~SH
+      #!/bin/bash
+      export PI_BIN="${PI_BIN:-#{opt_libexec}/pi/node_modules/.bin/pi}"
+      exec "#{node}" "#{opt_libexec}/computer/dist/main.js" "$@"
+    SH
   end
 
   def post_install
-    (var/"codoxear").mkpath
+    # Service stdout carries the one-time Owner entry link: keep it in a private directory.
+    private_dir = var/"codoxear"
+    private_dir.mkpath
+    private_dir.chmod 0700
   end
 
+  # Installed but NOT started: `brew services start codoxear` is the single deliberate action.
+  # Role (hub / node) derives from connections at runtime; nothing to configure.
   service do
-    run [opt_bin/"codoxear-computer", "start"]
+    run [opt_bin/"codoxear", "start"]
     working_dir var/"codoxear"
-    environment_variables CODOXEAR_COMPUTER_CONTROL_SOCKET: "#{var}/codoxear/computer-control.sock",
-                          CODOXEAR_DEFAULT_WORKSPACE:       "#{Dir.home}/ylangs_ws"
     keep_alive true
-    log_path var/"log/codoxear-computer.log"
-    error_log_path var/"log/codoxear-computer.error.log"
+    log_path var/"codoxear/service.log"
+    error_log_path var/"codoxear/service.error.log"
   end
 
   def caveats
     <<~EOS
-      This is the v2 Computer service (DexGEM internal architecture), replacing
-      the standalone v1 server. The web UI is served by your Hub (production:
-      https://codoxear.dex-gem.ai:1443), not by this machine.
-
-      Attach this Computer to a Hub first (pairing code comes from the Hub web
-      UI: create a Computer record, then):
-        codoxear-computer attach --hub <hub-origin> --code <code> --workspace <dir>
-
-      Then start the service:
+      Start this node (the only step):
         brew services start codoxear
 
-      Useful: codoxear-computer status | doctor | provider list | help
+      First start prints a private one-time Owner entry link (the directory is
+      user-private, mode 0700):
+        grep 'private one-time link' #{var}/codoxear/service.log
+
+      Open it once, then use the Network page: connect upstream (attach to another
+      node) or connect downstream (issue a pairing code). The node derives its role
+      from its connections; there is nothing else to configure.
+
+      CLI: codoxear-computer status | doctor | attach | provider
     EOS
   end
 
   test do
     assert_match "Codoxear Computer", shell_output("#{bin}/codoxear-computer help")
-    assert_match "Codoxear Computer", shell_output("#{bin}/codoxear help")
+    assert_path_exists libexec/"hub/dist/server.js"
+    assert_path_exists libexec/"computer/dist/local-control.js"
+    assert_path_exists libexec/"frontend/dist/client"
+    assert_path_exists libexec/"pi/node_modules/.bin/pi"
   end
 end
