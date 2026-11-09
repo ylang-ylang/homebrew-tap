@@ -1,9 +1,9 @@
 class Codoxear < Formula
-  desc "Codoxear agent node: hub, computer and web in one service"
+  desc "Codoxear HTTPS agent node with symmetric pinned links"
   homepage "https://github.com/DexGEM-Lab/codoxear-dexgem-internal"
   url "git@github.com:DexGEM-Lab/codoxear-dexgem-internal.git",
       using:    :git,
-      revision: "301b855f9c1e1e99fcfe4df7adb4eb6c893ae2e4"
+      revision: "1f5108d0bea4a1d31bcc7b21ac577606387becdc"
   version "0.2.0-preview.1"
   license "MIT"
 
@@ -13,28 +13,17 @@ class Codoxear < Formula
   depends_on "node"
 
   def install
-    cd "src/computer" do
-      # npm's allowScripts policy blocks the two native deps' install scripts;
-      # approve them declaratively before npm ci so node-gyp runs.
-      inreplace "package.json",
-                '"exports": {',
-                '"allowScripts": { "@lydell/node-pty@1.2.0-beta.15": true, "koffi@3.3.2": true }, "exports": {'
+    # The node build bundles its protocol/shared libraries and executable host entries.
+    cd "src/node" do
       system "npm", "ci"
+      system "npm", "prune", "--omit=dev", "--prefix", "host/runtime/oar"
       system "npm", "run", "build"
       system "npm", "prune", "--omit=dev"
-      system "npm", "prune", "--omit=dev", "--prefix", "runtime/oar"
-      (libexec/"computer").install "dist", "node_modules", "runtime", "package.json"
-    end
-    cd "src/hub" do
-      system "npm", "ci"
-      system "npm", "run", "build"
-      system "npm", "prune", "--omit=dev"
-      (libexec/"hub").install "dist", "node_modules", "package.json"
+      (libexec/"node").install "dist", "node_modules", "package.json"
     end
     cd "src/frontend" do
       system "npm", "ci"
-      # LAN build: CSP allows plain-HTTP hubs (see src/frontend/build.mjs).
-      with_env(CODOXEAR_LAN_CSP: "1") { system "npm", "run", "build" }
+      system "npm", "run", "build"
       (libexec/"frontend").install "dist"
     end
     libexec.install "deploy/node.mjs"
@@ -49,11 +38,6 @@ class Codoxear < Formula
       export PI_BIN="${PI_BIN:-#{opt_libexec}/pi/node_modules/.bin/pi}"
       exec "#{node}" "#{opt_libexec}/node.mjs" "$@"
     SH
-    (bin/"codoxear-computer").write <<~SH
-      #!/bin/bash
-      export PI_BIN="${PI_BIN:-#{opt_libexec}/pi/node_modules/.bin/pi}"
-      exec "#{node}" "#{opt_libexec}/computer/dist/main.js" "$@"
-    SH
   end
 
   def post_install
@@ -64,7 +48,6 @@ class Codoxear < Formula
   end
 
   # Installed but NOT started: `brew services start codoxear` is the single deliberate action.
-  # Role (hub / node) derives from connections at runtime; nothing to configure.
   service do
     run [opt_bin/"codoxear", "start"]
     working_dir var/"codoxear"
@@ -78,25 +61,23 @@ class Codoxear < Formula
       Start this node (the only step):
         brew services start codoxear
 
-      Then open http://<this machine's LAN address>:17430 in a browser and sign in
-      with the starting password admin (there is no account name). You are asked
-      to choose your own password (8 or more characters) right away, and
-      whoever completes that first sign-in becomes the Owner, so do it before
+      Then open https://<this machine's LAN address>:17430 in a browser.
+      Check the address and accept this node's self-signed certificate once.
+      Sign in with the starting password admin, then choose a new password
+      of 8 or more characters (no other rule). Complete first use before
       exposing the node to a network you do not trust.
 
-      The Network page connects upstream (attach to another node) or downstream
-      (issue a pairing code). The node derives its role from its connections;
-      there is nothing else to configure.
-
-      CLI: codoxear-computer status | doctor | attach | provider
+      Open the Graph page to create or accept invitations. Linked nodes
+      can fully control each other's agents, including shell commands.
+      Compare the name, address and certificate fingerprint before confirming.
+      Use Share in a session for temporary control of only that session.
     EOS
   end
 
   test do
-    assert_match "Codoxear Computer", shell_output("#{bin}/codoxear-computer help")
-    assert_path_exists libexec/"hub/dist/server.js"
-    assert_path_exists libexec/"computer/dist/local-control.js"
-    assert_path_exists libexec/"frontend/dist/client"
+    assert_path_exists libexec/"node/dist/index.js"
+    assert_path_exists libexec/"node/dist/host/native/broker.js"
+    assert_path_exists libexec/"frontend/dist/node/login.html"
     assert_path_exists libexec/"pi/node_modules/.bin/pi"
   end
 end
