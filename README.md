@@ -7,9 +7,10 @@ brew install ylang-ylang/tap/rbw
 ```
 
 `rbw` is built from the fixed `ylangs-fork/rbw` commit in `Formula/rbw.rb`, not
-from upstream rbw. Published bottles cover Linux x86_64 and macOS 15 (Apple
-Silicon and Intel; Homebrew may also use these on newer macOS releases).
-Other platforms and `--HEAD` build from source. Bottles avoid installing the
+from upstream rbw. Published bottles cover Linux x86_64 and macOS 15 Apple
+Silicon (Homebrew may also use these on newer macOS releases).
+Other platforms and `--HEAD` build from source. Intel macOS is not bottled:
+Homebrew has retired its Intel build-toolchain bottles. Bottles avoid installing the
 Rust/LLVM build toolchain; the `pinentry` runtime dependency is still required.
 Existing installations can use `brew reinstall ylang-ylang/tap/rbw` after updating
 the tap. This does not automatically remove previously installed build tools.
