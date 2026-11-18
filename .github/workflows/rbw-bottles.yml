@@ -1,0 +1,87 @@
+name: rbw-bottles
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rbw-bottles
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+    steps:
+      # This action checks out the exact workflow SHA into the Homebrew tap.
+      - uses: Homebrew/actions/setup-homebrew@4790763c0a3ba4036f72634dc079c4a7dfcd4878
+      - name: Build and test pinned fork
+        run: |
+          brew install --build-bottle ylang-ylang/tap/rbw
+          rbw --version
+          rbw-agent --version
+          rbw gen-completions bash > /dev/null
+      - name: Package bottle
+        run: |
+          mkdir bottles
+          cd bottles
+          brew bottle --json --root-url="https://github.com/${GITHUB_REPOSITORY}/releases/download/rbw-bottles-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" ylang-ylang/tap/rbw
+      - name: Verify bottle installation
+        run: |
+          brew uninstall ylang-ylang/tap/rbw
+          brew install --force-bottle ./bottles/rbw--*.bottle*.tar.gz
+          rbw --version
+          rbw-agent --version
+          rbw gen-completions bash > /dev/null
+          brew info --json=v2 ylang-ylang/tap/rbw | jq -e '.formulae[0].installed[0].poured_from_bottle == true'
+      - name: Attest bottle provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: bottles/*.tar.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rbw-${{ matrix.os }}
+          path: bottles/*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: rbw-bottles-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: rbw-*
+          path: bottles
+          merge-multiple: true
+      - name: Publish immutable bottle URLs
+        run: |
+          # brew bottle uses rbw--VERSION locally, but URLs use rbw-VERSION.
+          for bottle in bottles/rbw--*.tar.gz; do
+            mv "$bottle" "${bottle/rbw--/rbw-}"
+          done
+          gh release create "$RELEASE_TAG" bottles/* \
+            --target "$GITHUB_SHA" \
+            --title "rbw bottles ($RELEASE_TAG)" \
+            --notes "Built from tap commit $GITHUB_SHA in https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Source revision is pinned in Formula/rbw.rb. Bottle checksums must be reviewed and merged into the formula before users receive these binaries. Verify provenance with: gh attestation verify <bottle.tar.gz> --repo $GITHUB_REPOSITORY" \
+            --latest=false
+          echo "Release: https://github.com/$GITHUB_REPOSITORY/releases/tag/$RELEASE_TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Merge the released bottle JSON into Formula/rbw.rb with brew bottle --merge --write --no-commit, then publish the formula through a reviewed PR.' >> "$GITHUB_STEP_SUMMARY"
