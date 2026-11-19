@@ -22,11 +22,10 @@ Existing installations of this tap's `rbw` formula migrate with ordinary
 conflicts with other `rbw` formulas because they install the same binaries.
 Do not delete your configuration or vault data to migrate.
 
-No rbwBio bottles are currently declared; Homebrew builds from source and may
-install Rust and other build dependencies. The bottle workflow targets Linux
-x86_64 and macOS 15 Apple Silicon (Homebrew may use these on newer macOS).
-Old `rbw` bottles are not reused. Once new bottles are built and their checksums
-are merged, supported installations can avoid the Rust build toolchain.
+Precompiled rbwBio bottles are published for Linux x86_64 and macOS 15 Apple
+Silicon (Homebrew may use these on newer macOS). Supported installations avoid
+the Rust build toolchain. Both platforms are built, tested and reinstalled in
+public CI, with SHA-256 checksums and GitHub build-provenance attestations.
 Other platforms and `--HEAD` build from source. The `pinentry` runtime dependency
 is still required; upgrading does not remove previously installed build tools.
 
