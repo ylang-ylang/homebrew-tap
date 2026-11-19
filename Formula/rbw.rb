@@ -1,17 +1,10 @@
 class Rbw < Formula
   desc "Unofficial Bitwarden CLI client (ylangs-fork build)"
   homepage "https://github.com/ylangs-fork/rbw"
-  url "https://github.com/ylangs-fork/rbw.git", revision: "0e12f89e36370e3ac354d7c2a80e616ef60a2b58"
-  version "1.16.0"
+  url "https://github.com/ylangs-fork/rbw.git", revision: "ea545ad28c30991de8a0f04fee99fcf3c4c97dc5"
+  version "1.17.0"
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
-
-  bottle do
-    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbw-bottles-44477179125-1"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "029abed98f559eeb5ea59431e91e3f7644e285f4856023da38a0e1cfdd52e6c1"
-    sha256 cellar: :any, x86_64_linux: "ff22a65d75225a7b278bf2e208c96c4423e1c6f81f3a406b630c6ba90b32319e"
-  end
 
   depends_on "rust" => :build
   depends_on "pinentry"
@@ -26,6 +19,13 @@ class Rbw < Formula
     resource "linux-pam" do
       url "https://github.com/linux-pam/linux-pam/releases/download/v1.7.3/Linux-PAM-1.7.3.tar.xz"
       sha256 "2ce4765fd49df6693771ef2941f81e33d8ee14b94a81a5c7b369aa3b137b85a5"
+    end
+
+    on_intel do
+      resource "face-runtime" do
+        url "https://github.com/ylangs-fork/rbw/releases/download/face-runtime-44495312636-1/rbw-face-runtime-1.17.0-linux-x86_64-ubuntu22.04.tar.gz"
+        sha256 "c93f0aa8022b79f401228764bd49a836d1ef3ce5f827166b2f6247a979850676"
+      end
     end
   end
 
@@ -55,6 +55,9 @@ class Rbw < Formula
         (pkgshare/"linux-pam").install "Copyright"
       end
       ENV.append "RUSTFLAGS", "-L native=#{pam_libdir} -C link-arg=-Wl,-rpath,#{pam_libdir}"
+      if Hardware::CPU.intel?
+        libexec.install resource("face-runtime").cached_download => "face-runtime.tar.gz"
+      end
     end
     system "cargo", "install", *std_cargo_args
     generate_completions_from_executable(bin/"rbw", "gen-completions")
@@ -62,13 +65,15 @@ class Rbw < Formula
 
   def caveats
     <<~EOS
-      Linux face authorization uses the system's native Howdy PAM module.
-      Configure Howdy's IR camera and enroll your face, then run:
-        rbw setup --apply
-        rbw setup --check
-      Setup only installs rbw's dedicated PAM policy; it does not change sudo/login.
-      Howdy, camera drivers, and face models are not included in this formula.
-      macOS supports remote/requester use, not Howdy face authorization.
+      Run rbw login normally. Interactive login offers face authorization [y/N].
+      No keeps ordinary rbw behavior. Yes deploys the precompiled face runtime,
+      enrolls your face, verifies recognition and notifications, and activates it.
+      The Linux x86_64 runtime supports Ubuntu 22.04/24.04 and may request sudo.
+      Opt-in setup never runs apt/pip, network downloads, or a compiler.
+      Each local authorization notifies the desktop while recognizing your face.
+      sudo/login policies are unchanged; cold unlock still needs Master Password.
+      Use rbw setup --apply only to enable later or repair enrollment.
+      macOS supports remote/requester use, not local Howdy face authorization.
     EOS
   end
 

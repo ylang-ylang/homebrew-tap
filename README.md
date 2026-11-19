@@ -29,27 +29,34 @@ brew install --build-from-source ylang-ylang/tap/rbw
 
 ### Linux face setup
 
-Howdy with native `pam_howdy.so` is the only supported biometric setup backend.
-Install/configure Howdy for the laptop's IR camera and enroll your Linux user
-using the distribution's Howdy instructions first. The bottle does not include
-camera drivers, recognition models, or a production simulator.
+Log in normally after installing:
 
 ```sh
-rbw setup --apply
-rbw setup --check
-rbw stop-agent
-rbw unlock
+rbw login
 ```
 
-Setup only installs the dedicated root-controlled `/etc/pam.d/rbw-device-auth`
-policy after explicit authorization; it does not edit sudo/login. Face failure
-rejects the operation, and Master Password remains required for cold unlock.
-Configuration readiness is not proof that the camera or a real face works.
-macOS requester/remote operation remains supported, but Howdy setup is Linux-only.
+The interactive login asks **Enable face authorization for rbw? [y/N]** once.
+Enter keeps ordinary rbw behavior. Yes deploys the precompiled runtime installed
+by Brew, selects the IR camera, enrolls and verifies your face, checks desktop
+notifications, and updates the agent without losing the unlocked session.
+
+The Linux x86_64 face runtime targets Ubuntu 22.04/24.04 and includes Python,
+dlib, OpenCV, models and native runtime libraries. Opt-in deployment may request
+sudo, but never apt/pip, network downloads or a local compiler. Missing matching
+precompiled artifacts fail explicitly; no sudo/login PAM policies are changed.
+Every face authorization delivers a secret-free desktop notification while
+recognition runs; failed recognition or notification delivery denies the operation.
+Master Password remains required for cold unlock. Real camera matching and
+spoof resistance are not established by the no-hardware smoke.
+
+Pipelines never prompt. Use `rbw setup --apply` only to opt in later or repair
+enrollment, and `rbw setup --check` for read-only diagnostics.
+macOS requester/remote operation remains supported; local Howdy is Linux-only.
 
 The Linux package carries a private PAM library configured to read `/etc`,
-not the user-writable Homebrew `etc` directory. It does not install system PAM
-modules or replace the operating system's PAM library.
+not the user-writable Homebrew `etc` directory. Brew installation alone does not
+install system face components or replace the operating system's PAM library;
+the opt-in wizard separately provisions its isolated Howdy module.
 
 ### Publishing rbw bottles
 
