@@ -34,6 +34,7 @@ jobs:
           rbw --version
           rbw-agent --version
           rbw gen-completions bash > /dev/null
+          brew test ylang-ylang/tap/rbw
       - name: Package bottle
         run: |
           mkdir bottles
@@ -47,6 +48,7 @@ jobs:
           rbw-agent --version
           rbw gen-completions bash > /dev/null
           brew info --json=v2 ylang-ylang/tap/rbw | jq -e '.formulae[0].installed[0].poured_from_bottle == true'
+          brew test ylang-ylang/tap/rbw
       - name: Attest bottle provenance
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
