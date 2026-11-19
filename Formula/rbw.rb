@@ -1,7 +1,7 @@
 class Rbw < Formula
   desc "Unofficial Bitwarden CLI client (ylangs-fork build)"
   homepage "https://github.com/ylangs-fork/rbw"
-  url "https://github.com/ylangs-fork/rbw.git", revision: "ff6329045560f89125645ef57f2808e83d775559"
+  url "https://github.com/ylangs-fork/rbw.git", revision: "0e12f89e36370e3ac354d7c2a80e616ef60a2b58"
   version "1.16.0"
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
