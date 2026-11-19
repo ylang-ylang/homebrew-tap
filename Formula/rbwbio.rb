@@ -6,6 +6,13 @@ class Rbwbio < Formula
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
 
+  bottle do
+    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbwbio-bottles-44545908119-2"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "fb6df9d5b1c567d21e36cbee3403a4a58ed8da654e809e61af035bb6ed2f42c6"
+    sha256 cellar: :any, x86_64_linux: "331bb0ae5ec42972315fa59e3044a8b6db9101541e13a8dadb6d46e6a6951798"
+  end
+
   depends_on "rust" => :build
   depends_on "pinentry"
   conflicts_with "rbw", because: "both install rbw and rbw-agent binaries"
