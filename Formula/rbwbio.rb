@@ -1,17 +1,10 @@
 class Rbwbio < Formula
   desc "rbwBio: Bitwarden CLI with opt-in face authorization"
   homepage "https://github.com/ylangs-fork/rbw"
-  url "https://github.com/ylangs-fork/rbw.git", revision: "1e0938f70d41ec703427bcbcf95af920465fdebb"
-  version "1.17.1"
+  url "https://github.com/ylangs-fork/rbw.git", revision: "ca46205a3189e2e08f02d599478f7e08ce6ed310"
+  version "1.17.2"
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
-
-  bottle do
-    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbwbio-bottles-44506595126-1"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ac0e085fbaac8ebcef02e46c975cc6b77e6cfa6436f10b59a6cab35d3fde50a5"
-    sha256 cellar: :any, x86_64_linux: "e740a87356565d9c92247d12c01f635d795ffebd98b96a211d5ab41884514512"
-  end
 
   depends_on "rust" => :build
   depends_on "pinentry"
@@ -75,7 +68,9 @@ class Rbwbio < Formula
     <<~EOS
       rbwBio keeps the rbw/rbw-agent commands and your existing config and vault.
       Run rbw login normally; face authorization is opt-in [y/N] (default No).
-      Yes deploys the bundled runtime, enrolls and verifies your face, and activates it.
+      Yes deploys the bundled runtime and opens a local live IR enrollment preview.
+      The preview shows darkness and threshold; Cancel aborts without saving photos.
+      Face recognition and notifications are verified before activation.
       Local face setup requires GNU/Linux x86_64, glibc >= 2.35 (Ubuntu 22.04/24.04
       or compatible Manjaro), an IR camera and desktop notifications; it may request sudo.
       Only opt-in deployment avoids downloads, package installation and compilation.

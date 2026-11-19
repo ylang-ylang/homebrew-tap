@@ -47,6 +47,9 @@ The interactive login asks **Enable face authorization for rbw? [y/N]** once.
 Enter keeps ordinary rbw behavior. Yes deploys the precompiled runtime installed
 by Brew, selects the IR camera, enrolls and verifies your face, checks desktop
 notifications, and updates the agent without losing the unlocked session.
+During desktop enrollment, a local browser preview shows the same IR frames
+used for recognition, with darkness percentage and threshold. Cancel aborts
+enrollment; frames remain in memory and are never saved or uploaded.
 
 The GNU/Linux x86_64 face runtime requires glibc 2.35 or newer (Ubuntu
 22.04/24.04 or compatible Manjaro x86_64) and includes Python, dlib, OpenCV,
