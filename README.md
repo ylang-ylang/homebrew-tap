@@ -82,7 +82,7 @@ Build records and binaries are public under this repository's Actions and
 Releases. To verify a downloaded bottle's provenance:
 
 ```sh
-gh attestation verify ./rbw-1.16.0.PLATFORM.bottle.1.tar.gz --repo ylang-ylang/homebrew-tap
+gh attestation verify ./rbw-1.17.0.PLATFORM.bottle.1.tar.gz --repo ylang-ylang/homebrew-tap
 ```
 
 An attestation proves build origin, not a security audit or reproducible build.

@@ -6,6 +6,13 @@ class Rbw < Formula
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
 
+  bottle do
+    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbw-bottles-44502330551-1"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1a1e934c9f707c242e0319b2c6a192f039cecd8fb0860a792fd649d077a920a2"
+    sha256 cellar: :any, x86_64_linux: "de35eaed2a0f00e194b6490070a3c23899e23b638101000816a51f0b8d35af6d"
+  end
+
   depends_on "rust" => :build
   depends_on "pinentry"
 
