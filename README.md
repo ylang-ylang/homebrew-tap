@@ -6,6 +6,12 @@
 brew install ylang-ylang/tap/rbw
 ```
 
+If Homebrew requires tap trust, trust only this formula:
+
+```sh
+brew trust --formula ylang-ylang/tap/rbw
+```
+
 `rbw` is built from the fixed `ylangs-fork/rbw` commit in `Formula/rbw.rb`, not
 from upstream rbw. Published bottles cover Linux x86_64 and macOS 15 Apple
 Silicon (Homebrew may also use these on newer macOS releases).
@@ -69,7 +75,7 @@ Build records and binaries are public under this repository's Actions and
 Releases. To verify a downloaded bottle's provenance:
 
 ```sh
-gh attestation verify ./rbw-1.15.0.PLATFORM.bottle.tar.gz --repo ylang-ylang/homebrew-tap
+gh attestation verify ./rbw-1.16.0.PLATFORM.bottle.1.tar.gz --repo ylang-ylang/homebrew-tap
 ```
 
 An attestation proves build origin, not a security audit or reproducible build.
