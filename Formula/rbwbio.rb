@@ -1,17 +1,10 @@
 class Rbwbio < Formula
   desc "rbwBio: Bitwarden CLI with opt-in face authorization"
   homepage "https://github.com/ylangs-fork/rbw"
-  url "https://github.com/ylangs-fork/rbw.git", revision: "01da183c602cdc142815dbdeef003039bafb56fd"
-  version "1.17.3"
+  url "https://github.com/ylangs-fork/rbw.git", revision: "632a67de4ab7b81ae4bfe6d2d9fbc0566c753075"
+  version "1.17.4"
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
-
-  bottle do
-    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbwbio-bottles-44518908027-1"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ef60c594f83d341dd823d926ee5826dddeafb5a4f32ed901936b2e6d01b5870d"
-    sha256 cellar: :any, x86_64_linux: "1dc5767209bad32f2d6f7dceafbf9e65824b3b8a6f851b35cd980fb619caabe9"
-  end
 
   depends_on "rust" => :build
   depends_on "pinentry"
@@ -75,11 +68,12 @@ class Rbwbio < Formula
     <<~EOS
       rbwBio keeps the rbw/rbw-agent commands and your existing config and vault.
       Run rbw login normally; face authorization is opt-in [y/N] (default No).
-      Yes deploys the bundled runtime and opens a local live IR enrollment preview.
-      The preview shows darkness and threshold; Cancel aborts without saving photos.
-      Face recognition and notifications are verified before activation.
+      Yes deploys the bundled runtime, records five IR samples and opens a smooth RGB preview.
+      Allow browser camera access. Color video stays in the browser; IR handles recognition.
+      Recognition and notifications are verified before activation; Cancel rolls setup back.
       Local face setup requires GNU/Linux x86_64, glibc >= 2.35 (Ubuntu 22.04/24.04
       or compatible Manjaro), an IR camera and desktop notifications; it may request sudo.
+      Desktop preview also needs an RGB webcam. Closing the page releases both cameras.
       Only opt-in deployment avoids downloads, package installation and compilation.
       Cold unlock still needs Master Password; unknown and sudo/login PAM policies stay unchanged.
       Use rbw setup --apply to enable later or repair. macOS is remote/requester only.
