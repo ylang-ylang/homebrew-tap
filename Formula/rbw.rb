@@ -56,7 +56,7 @@ class Rbw < Formula
       end
       ENV.append "RUSTFLAGS", "-L native=#{pam_libdir} -C link-arg=-Wl,-rpath,#{pam_libdir}"
       if Hardware::CPU.intel?
-        libexec.install resource("face-runtime").cached_download => "face-runtime.tar.gz"
+        cp resource("face-runtime").cached_download, libexec/"face-runtime.tar.gz"
       end
     end
     system "cargo", "install", *std_cargo_args
