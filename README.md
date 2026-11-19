@@ -21,6 +21,30 @@ To build from source instead:
 brew install --build-from-source ylang-ylang/tap/rbw
 ```
 
+### Linux face setup
+
+Howdy with native `pam_howdy.so` is the only supported biometric setup backend.
+Install/configure Howdy for the laptop's IR camera and enroll your Linux user
+using the distribution's Howdy instructions first. The bottle does not include
+camera drivers, recognition models, or a production simulator.
+
+```sh
+rbw setup --apply
+rbw setup --check
+rbw stop-agent
+rbw unlock
+```
+
+Setup only installs the dedicated root-controlled `/etc/pam.d/rbw-device-auth`
+policy after explicit authorization; it does not edit sudo/login. Face failure
+rejects the operation, and Master Password remains required for cold unlock.
+Configuration readiness is not proof that the camera or a real face works.
+macOS requester/remote operation remains supported, but Howdy setup is Linux-only.
+
+The Linux package carries a private PAM library configured to read `/etc`,
+not the user-writable Homebrew `etc` directory. It does not install system PAM
+modules or replace the operating system's PAM library.
+
 ### Publishing rbw bottles
 
 1. Update the pinned source revision/version in `Formula/rbw.rb` through a PR.
