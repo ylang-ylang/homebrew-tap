@@ -1,20 +1,14 @@
-class Rbw < Formula
-  desc "Unofficial Bitwarden CLI client (ylangs-fork build)"
+class Rbwbio < Formula
+  desc "rbwBio: Bitwarden CLI with opt-in face authorization"
   homepage "https://github.com/ylangs-fork/rbw"
-  url "https://github.com/ylangs-fork/rbw.git", revision: "ea545ad28c30991de8a0f04fee99fcf3c4c97dc5"
-  version "1.17.0"
+  url "https://github.com/ylangs-fork/rbw.git", revision: "1e0938f70d41ec703427bcbcf95af920465fdebb"
+  version "1.17.1"
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
 
-  bottle do
-    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbw-bottles-44502330551-1"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1a1e934c9f707c242e0319b2c6a192f039cecd8fb0860a792fd649d077a920a2"
-    sha256 cellar: :any, x86_64_linux: "de35eaed2a0f00e194b6490070a3c23899e23b638101000816a51f0b8d35af6d"
-  end
-
   depends_on "rust" => :build
   depends_on "pinentry"
+  conflicts_with "rbw", because: "both install rbw and rbw-agent binaries"
 
   on_linux do
     depends_on "meson" => :build
@@ -72,15 +66,14 @@ class Rbw < Formula
 
   def caveats
     <<~EOS
-      Run rbw login normally. Interactive login offers face authorization [y/N].
-      No keeps ordinary rbw behavior. Yes deploys the precompiled face runtime,
-      enrolls your face, verifies recognition and notifications, and activates it.
-      The Linux x86_64 runtime supports Ubuntu 22.04/24.04 and may request sudo.
-      Opt-in setup never runs apt/pip, network downloads, or a compiler.
-      Each local authorization notifies the desktop while recognizing your face.
-      sudo/login policies are unchanged; cold unlock still needs Master Password.
-      Use rbw setup --apply only to enable later or repair enrollment.
-      macOS supports remote/requester use, not local Howdy face authorization.
+      rbwBio keeps the rbw/rbw-agent commands and your existing config and vault.
+      Run rbw login normally; face authorization is opt-in [y/N] (default No).
+      Yes deploys the bundled runtime, enrolls and verifies your face, and activates it.
+      Local face setup requires GNU/Linux x86_64, glibc >= 2.35 (Ubuntu 22.04/24.04
+      or compatible Manjaro), an IR camera and desktop notifications; it may request sudo.
+      Only opt-in deployment avoids downloads, package installation and compilation.
+      Cold unlock still needs Master Password; unknown and sudo/login PAM policies stay unchanged.
+      Use rbw setup --apply to enable later or repair. macOS is remote/requester only.
     EOS
   end
 
