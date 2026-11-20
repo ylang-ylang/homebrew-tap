@@ -1,16 +1,15 @@
 class Rbwbio < Formula
   desc "rbwBio: Bitwarden CLI with opt-in face authorization"
   homepage "https://github.com/ylangs-fork/rbw"
-  url "https://github.com/ylangs-fork/rbw.git", revision: "6da3b8399a9f94fc25f51973c58e6245296d0256"
-  version "1.17.5"
+  url "https://github.com/ylangs-fork/rbw.git", revision: "58725139aa2ed6820b2f1c6b109bd0be3146166e"
+  version "1.18.0"
   license all_of: ["MIT", "BSD-3-Clause"]
   head "https://github.com/ylangs-fork/rbw.git", branch: "main"
 
   bottle do
-    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbwbio-bottles-44558053473-2"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "dd18c175ec2eb6bfc2d11ac9f562abe26945feeebba99ace1b391670aa42ea64"
-    sha256 cellar: :any, x86_64_linux: "c6b1c9bc5771abe30bffa170e27fe7e4839ae50f7415262644d98edec338a77d"
+    root_url "https://github.com/ylang-ylang/homebrew-tap/releases/download/rbwbio-bottles-44673614092-2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5589d8a3e05e2ac027d934ac51862b80c9682d59f8810e2bf9572a759f201e01"
+    sha256 cellar: :any, x86_64_linux: "6e3db1eb90fafd79855223003dbdbddd05e1f75102b818296b3df23ede79eba4"
   end
 
   depends_on "rust" => :build
@@ -45,6 +44,7 @@ class Rbwbio < Formula
 
   def install
     if OS.linux?
+      ENV["RBWBIO_DESKTOP_EXECUTABLE"] = (opt_bin/"rbw").to_s
       pam_libdir = libexec/"pam"
       resource("linux-pam").stage do
         system "meson", "setup", "pam-build", "--prefix=#{libexec}", "--libdir=pam",
@@ -68,6 +68,14 @@ class Rbwbio < Formula
       end
     end
     system "cargo", "install", *std_cargo_args
+    if OS.linux?
+      (share/"applications").mkpath
+      (share/"applications/rbwbio.desktop").write(
+        (buildpath/"assets/desktop/rbwbio.desktop.in").read.gsub("@RBW_EXEC@", (opt_bin/"rbw").to_s),
+      )
+      (share/"icons/hicolor/scalable/apps").install "assets/desktop/rbwbio.svg",
+                                                        "assets/desktop/rbwbio-symbolic.svg"
+    end
     generate_completions_from_executable(bin/"rbw", "gen-completions")
   end
 
@@ -84,6 +92,9 @@ class Rbwbio < Formula
       Only opt-in deployment avoids downloads, package installation and compilation.
       Cold unlock still needs Master Password; unknown and sudo/login PAM policies stay unchanged.
       Use rbw setup --apply to enable later or repair. macOS is remote/requester only.
+      Open rbwBio from the application menu, its optional tray icon, or rbw ui.
+      Click an authorization notification to view that exact request and its RGB preview.
+      Remote device requests require explicit fingerprint review, approval and native face verification.
     EOS
   end
 
